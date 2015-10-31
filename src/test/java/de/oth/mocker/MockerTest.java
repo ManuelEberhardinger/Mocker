@@ -5,13 +5,14 @@
  */
 package de.oth.mocker;
 
+import static de.oth.mocker.Mocker.atLeast;
+import static de.oth.mocker.Mocker.atMost;
 import java.util.*;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import static de.oth.mocker.Mocker.mock;
 import static de.oth.mocker.Mocker.never;
 import static de.oth.mocker.Mocker.times;
@@ -24,25 +25,6 @@ import static de.oth.mocker.Mocker.verify;
 
 public class MockerTest {
     
-    public MockerTest() {
-    }
-    
-    @BeforeClass
-    public static void setUpClass() {
-    }
-    
-    @AfterClass
-    public static void tearDownClass() {
-    }
-    
-    @Before
-    public void setUp() {
-    }
-    
-    @After
-    public void tearDown() {
-    }
-    
     @Test
     public void testMock() {
         
@@ -50,15 +32,24 @@ public class MockerTest {
 
     @Test
     public void testVerify() {
-        List<String> list = mock(ArrayList.class);
+        List<String> list = mock(LinkedList.class);
         list.add("e");
         list.add("w");
         list.add("e");
         list.clear();
         
-        verify(list, times(3)).add("e");
+        List<String> list2 = mock(ArrayList.class);
+        list2.add("e");
+        
+        verify(list2).add("e");
+        verify(list2, never()).clear();
+        
+        verify(list, times(2)).add("e");
         verify(list, never()).size();
         verify(list).clear();
+        verify(list, atLeast(2)).add("e");
+        verify(list, atMost(4)).add("w");
+        verify(list).add("w");
     }
     
 }

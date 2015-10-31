@@ -6,7 +6,7 @@
 package de.oth.mocker;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
+import java.util.*;
 import net.sf.cglib.proxy.*;
 
 /**
@@ -17,7 +17,6 @@ public class Mocker {
     
     private static final HashMap<String, Integer> hashMap= new HashMap<>();
     private static int value;
-    private static final Enhancer e = new Enhancer();
     private static boolean verifyCallback = false;
     private static int times;
     private static boolean isAtLeast = false;
@@ -26,9 +25,12 @@ public class Mocker {
     
     // Creates a mock of the given class.
     public static<T> T mock(Class<?> clazz){
+        
+        Enhancer e = new Enhancer();
+        
         e.setSuperclass(clazz);
         
-        setStandardCallback();
+        setStandardCallback(e);
         
         return (T) e.create();
     }
@@ -45,8 +47,8 @@ public class Mocker {
     }
     
     // verify if value of hash map and expected number are the same
-    private static void verify(Method m){
-        String name = m.getName();
+    private static void verify(Method m, Object[] os){
+        String name = m.getDeclaringClass() + m.getName() + Arrays.toString(os);
         
         // Failure if never and there is a key
         if(times == 0 && hashMap.containsKey(name))
@@ -80,8 +82,7 @@ public class Mocker {
         // Failure if expected not equals value
         else if(!(hashMap.get(name) == times))
             throw new AssertionError(verificationFailureString(times, hashMap.get(name)));
-        
-        verifyCallback = isAtMost = isAtLeast = setTimesCorrectly = false;            
+            
     }
     
     // Returns the failure string for the description of the AssertionError
@@ -90,16 +91,17 @@ public class Mocker {
     }
     
     // Sets the standard Callback of the Enhancer
-    private static void setStandardCallback(){
+    private static void setStandardCallback(Enhancer e){
         e.setCallback(new MethodInterceptor(){
             
         @Override
         public Object intercept(Object o, Method m, Object[] os, MethodProxy ms) throws Throwable {
             if(verifyCallback)
-                verify(m);
+                verify(m, os);
             else
-                setOrIncreaseHashMap(m.getName());
-            
+                setOrIncreaseHashMap(m.getDeclaringClass() + m.getName() + Arrays.toString(os));
+
+            verifyCallback = isAtMost = isAtLeast = setTimesCorrectly = false;  
             return null;
         }
         
@@ -108,12 +110,12 @@ public class Mocker {
     
     // The method you can call in your test files to verify the number of calls.
     public static<T>  T verify(T clazz, boolean... hasNumber){
-        if(e.getClass() == null){
-            throw new AssertionError("No mock was created!");
-        }
-        
+
         if(hasNumber.length == 0)
+        {
             times = 1;
+            setTimesCorrectly = true;
+        }
         else if(hasNumber.length > 1)
             throw new AssertionError("Too many arguments for times!");
         
