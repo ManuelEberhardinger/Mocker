@@ -15,30 +15,89 @@ import net.sf.cglib.proxy.*;
  */
 public class Mocker {
     
-    private static final HashMap<String, Integer> hashMap= new HashMap<>();
-    private static int value;
     private static boolean verifyCallback = false;
     private static int times;
     private static boolean isAtLeast = false;
     private static boolean isAtMost = false;
     private static boolean setTimesCorrectly = false;
     
+    // <editor-fold defaultstate="collapsed" desc="All mocking classes">
+    
     // Creates a mock of the given class.
     public static<T> T mock(Class<?> clazz){
         
+        HashMap<String, Integer> mockMap = new HashMap<>();
         Enhancer e = new Enhancer();
         
         e.setSuperclass(clazz);
         
-        setStandardCallback(e);
+        setStandardCallback(e, mockMap);
         
         return (T) e.create();
     }
     
+    // Sets the mocking Callback of the Enhancer
+    private static void setStandardCallback(Enhancer e, final HashMap<String, Integer> mockMap){
+        e.setCallback(new MethodInterceptor(){
+            
+        @Override
+        public Object intercept(Object o, Method m, Object[] os, MethodProxy ms) throws Throwable {
+            if(verifyCallback)
+                verify(m, os, mockMap);
+            else
+                setOrIncreaseHashMap(m.getDeclaringClass() + m.getName() + Arrays.toString(os), mockMap);
+
+            verifyCallback = isAtMost = isAtLeast = setTimesCorrectly = false;  
+            return null;
+        }
+        
+        });
+    }
+    
+    // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="All spying classes">
+    
+    // Creates a spy of the given class.
+    public static<T> T spy(T clazz){
+        
+        HashMap<String, Integer> spyMap = new HashMap<>();
+        Enhancer e = new Enhancer();
+        
+        e.setSuperclass(clazz.getClass());
+
+        setSpyCallback(e, clazz, spyMap);
+        
+        return (T) e.create();
+    }
+    
+    // Set the spying callback of the Enhancer
+    private static<T> void setSpyCallback(Enhancer e, final T obj, final HashMap<String, Integer> spyMap){
+        e.setCallback(new MethodInterceptor(){
+            
+        @Override
+        public Object intercept(Object o, Method m, Object[] os, MethodProxy ms) throws Throwable {
+            if(verifyCallback){
+                verify(m, os, spyMap);
+                verifyCallback = isAtMost = isAtLeast = setTimesCorrectly = false;  
+                return null;
+            }
+            else{
+                setOrIncreaseHashMap(m.getDeclaringClass() + m.getName() + Arrays.toString(os), spyMap);
+                Object value = m.invoke(obj, os);
+                return value;
+            } 
+        }
+        
+        });
+    }
+    
+    // </editor-fold>
+    
     // Sets or increases the value of the hash map.
-    private static void setOrIncreaseHashMap(String key){
+    private static void setOrIncreaseHashMap(String key, HashMap<String, Integer> hashMap){
         if(hashMap.containsKey(key)){
-            value = hashMap.get(key);
+            int value = hashMap.get(key);
             value++;
             hashMap.replace(key, value);
         }
@@ -47,7 +106,7 @@ public class Mocker {
     }
     
     // verify if value of hash map and expected number are the same
-    private static void verify(Method m, Object[] os){
+    private static void verify(Method m, Object[] os, HashMap<String, Integer> hashMap){
         String name = m.getDeclaringClass() + m.getName() + Arrays.toString(os);
         
         // Failure if never and there is a key
@@ -67,7 +126,7 @@ public class Mocker {
             if(times <= hashMap.get(name))
                 return;
             else
-                throw new AssertionError("Verification failure: Expected greater than " + times + " calls but was " + hashMap.get(name));
+                throw new AssertionError("Verification failure: Expected greater than " + times + " calls but is " + hashMap.get(name));
                       
         }
         
@@ -76,7 +135,7 @@ public class Mocker {
             if(times >= hashMap.get(name))
                 return;
             else
-                throw new AssertionError("Verification failure: Expected lesser than " + times + " calls but was " + hashMap.get(name));
+                throw new AssertionError("Verification failure: Expected lesser than " + times + " calls but is " + hashMap.get(name));
         }
         
         // Failure if expected not equals value
@@ -84,30 +143,7 @@ public class Mocker {
             throw new AssertionError(verificationFailureString(times, hashMap.get(name)));
             
     }
-    
-    // Returns the failure string for the description of the AssertionError
-    private static String verificationFailureString(int expected, int value){
-        return "Verification failure: Expected number of calls was " + expected + " but is " + value;
-    }
-    
-    // Sets the standard Callback of the Enhancer
-    private static void setStandardCallback(Enhancer e){
-        e.setCallback(new MethodInterceptor(){
-            
-        @Override
-        public Object intercept(Object o, Method m, Object[] os, MethodProxy ms) throws Throwable {
-            if(verifyCallback)
-                verify(m, os);
-            else
-                setOrIncreaseHashMap(m.getDeclaringClass() + m.getName() + Arrays.toString(os));
-
-            verifyCallback = isAtMost = isAtLeast = setTimesCorrectly = false;  
-            return null;
-        }
-        
-        });
-    }
-    
+       
     // The method you can call in your test files to verify the number of calls.
     public static<T>  T verify(T clazz, boolean... hasNumber){
 
@@ -126,6 +162,13 @@ public class Mocker {
             
         return clazz;
     }
+    
+    // Returns the failure string for the description of the AssertionError
+    private static String verificationFailureString(int expected, int value){
+        return "Verification failure: Expected number of calls was " + expected + " but is " + value;
+    }
+    
+    // <editor-fold defaultstate="collapsed" desc="Methods for specifying number of calls">
     
     // Methods for setting the expected number of calls.
     public static boolean times(int number){
@@ -154,4 +197,6 @@ public class Mocker {
         return true;
     }
 
+    // </editor-fold>
+    
 }
