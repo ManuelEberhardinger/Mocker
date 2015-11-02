@@ -145,15 +145,7 @@ public class Mocker {
     }
        
     // The method you can call in your test files to verify the number of calls.
-    public static<T>  T verify(T clazz, boolean... hasNumber){
-
-        if(hasNumber.length == 0)
-        {
-            times = 1;
-            setTimesCorrectly = true;
-        }
-        else if(hasNumber.length > 1)
-            throw new AssertionError("Too many arguments for times!");
+    public static<T>  T verify(T clazz, boolean hasNumber){
         
         if(setTimesCorrectly == false)
             throw new AssertionError("The expected number of calls was not set!");
@@ -161,6 +153,10 @@ public class Mocker {
         verifyCallback = true;
             
         return clazz;
+    }
+    
+    public static<T> T verify(T clazz){
+        return verify(clazz, times(1));
     }
     
     // Returns the failure string for the description of the AssertionError
@@ -198,5 +194,4 @@ public class Mocker {
     }
 
     // </editor-fold>
-    
 }
