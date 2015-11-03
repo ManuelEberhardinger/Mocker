@@ -7,13 +7,9 @@ package de.oth.mocker;
 
 import java.util.*;
 import org.junit.Test;
-import static de.oth.mocker.Mocker.atLeast;
-import static de.oth.mocker.Mocker.atMost;
 import static de.oth.mocker.Mocker.mock;
-import static de.oth.mocker.Mocker.never;
-import static de.oth.mocker.Mocker.times;
-import static de.oth.mocker.Mocker.verify;
-import static de.oth.mocker.Mocker.spy;
+import static de.oth.mocker.Spyer.spy;
+import static de.oth.mocker.AbstractInvocationTimes.*;
 import junit.framework.Assert;
 
 /**
