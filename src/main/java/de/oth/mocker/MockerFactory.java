@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package de.oth.mocker;
 
 import java.lang.reflect.Method;
@@ -12,16 +8,13 @@ import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
-/**
- *
- * @author manuel
- */
 public class MockerFactory extends AbstractMocker {
     
     private final Class<?> _clazz;
     private final Enhancer _e;
     private final HashMap<String, Integer> _hashMap;
     
+    // Creates a MockerFactory object
     public MockerFactory(Class<?> clazz){
         if(clazz == null)
             throw new NullPointerException("clazz");
@@ -31,17 +24,20 @@ public class MockerFactory extends AbstractMocker {
         _hashMap = new HashMap<>();
     }
     
+    // Creates the reflection of the class and returns it
     @Override
     public <T> T create() {
 
         _e.setSuperclass(_clazz);
         
         _e.setCallback((MethodInterceptor) (Object o, Method m, Object[] os, MethodProxy ms) -> {
-            if(AbstractInvocationTimes.isVerify())
+            // if the verify flag is set the verify callback will be executed
+            // otherwise the number of method calls will be increased
+            if(_invTimes != null && _invTimes.isVerify())
                 _invTimes.verify(m.getDeclaringClass() + m.getName() + Arrays.toString(os), _hashMap);
             else
                 setOrIncreaseHashMap(m.getDeclaringClass() + m.getName() + Arrays.toString(os), _hashMap);
- 
+            
             return null;
         });
         

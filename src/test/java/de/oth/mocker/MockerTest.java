@@ -1,21 +1,15 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package de.oth.mocker;
 
 import java.util.*;
 import org.junit.Test;
 import static de.oth.mocker.Mocker.mock;
-import static de.oth.mocker.Spyer.spy;
-import static de.oth.mocker.AbstractInvocationTimes.*;
+import static de.oth.times.AbstractInvocationTimes.*;
+import static de.oth.times.InvocationAtLeast.atLeast;
+import static de.oth.times.InvocationAtMost.atMost;
+import static de.oth.times.InvocationTimes.never;
+import static de.oth.times.InvocationTimes.times;
 import junit.framework.Assert;
-
-/**
- *
- * @author manuel
- */
 
 public class MockerTest {
 
@@ -56,29 +50,5 @@ public class MockerTest {
         verify(list3, never()).clear();
         verify(list3).contains("e");
         verify(list3).size();
-    }
-    
-    @Test
-    public void testVerifySpying(){
-        List<String> names = new ArrayList<>();
-        List<String> spyList = spy(names);
-        
-        spyList.add("e");
-        spyList.add("e");
-        spyList.add("Hallo!");
-        
-        // Test the return values.
-        int size = spyList.size();
-        String testString = spyList.get(2);
-                
-        Assert.assertEquals(3, size);
-        Assert.assertEquals("Hallo!", testString);
-        
-        verify(spyList, times(2)).add("e");
-        verify(spyList).size();
-        verify(spyList, never()).clear();
-        verify(spyList).add("Hallo!");
-        verify(spyList).get(2);
-    }
-    
+    }    
 }

@@ -1,27 +1,30 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package de.oth.mocker;
+
+package de.oth.times;
 
 import java.util.HashMap;
 
-/**
- *
- * @author manuel
- */
+// The only way to create an object is with the static methods to verify
+// the number of calls 
 public class InvocationAtMost extends AbstractInvocationTimes{
     
     private final int _atMost;
     
-    public InvocationAtMost(int number){
+    // Creates a new InvocationAtMost object
+    private InvocationAtMost(int number){
         if(number < 0)
             throw new IllegalArgumentException("number");
         
         _atMost = number;
     }
     
+    // Method to set the expected number of method calls
+    // Returns a new InvocationTimes object
+    public static AbstractInvocationTimes atMost(int number){
+        return new InvocationAtMost(number);
+    }
+    
+    // Verify if it's the right amount of method calls
+    // If not an AssertionError is thrown -> Unit tests fail
     @Override
     public void verify(String name, HashMap<String, Integer> hashMap) {
         if(name == null)

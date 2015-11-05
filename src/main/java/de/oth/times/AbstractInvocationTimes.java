@@ -1,39 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package de.oth.mocker;
 
+package de.oth.times;
+
+import de.oth.mocker.AbstractMocker;
 import java.util.*;
+import static de.oth.times.InvocationTimes.*;
 
-/**
- *
- * @author manuel
- */
 public abstract class AbstractInvocationTimes {
     
     private static boolean _isVerify = false;
-    
-    // <editor-fold defaultstate="collapsed" desc="Static methods for specifying number of calls">
-    
-    public static AbstractInvocationTimes times(int number){
-        return new InvocationTimes(number);
-    }
-    
-    public static AbstractInvocationTimes never(){
-        return new InvocationTimes(0);
-    }
-    
-    public static AbstractInvocationTimes atLeast(int number){
-        return new InvocationAtLeast(number);
-    }
-    
-    public static AbstractInvocationTimes atMost(int number){
-        return new InvocationAtMost(number);
-    }
-    
-    // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Static methods for calling verify">
     
@@ -58,7 +32,7 @@ public abstract class AbstractInvocationTimes {
     // </editor-fold>
     
     // Returns a boolean if the verify callback has to be called
-    public static boolean isVerify(){
+    public boolean isVerify(){
         boolean toReturn = _isVerify;
         _isVerify = false;
         return toReturn;

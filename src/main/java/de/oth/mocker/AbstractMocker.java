@@ -1,16 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package de.oth.mocker;
 
+import de.oth.times.AbstractInvocationTimes;
 import java.util.HashMap;
 
-/**
- *
- * @author manuel
- */
 public abstract class AbstractMocker {
 
     protected static AbstractInvocationTimes _invTimes;

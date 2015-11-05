@@ -1,27 +1,36 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package de.oth.mocker;
+
+package de.oth.times;
 
 import java.util.HashMap;
 
-/**
- *
- * @author manuel
- */
+// The only way to create an object is with the static methods to verify
+// the number of calls 
 public class InvocationTimes extends AbstractInvocationTimes {
 
     private final int _times;
     
-    public InvocationTimes(int number){
+    // Creates a new InvocationTimes object
+    private InvocationTimes(int number){
         if(number < 0)
             throw new IllegalArgumentException("number");
         
         _times= number;
     }
     
+    // Method to set the expected number of method calls
+    // Returns a new InvocationTimes object
+    public static AbstractInvocationTimes times(int number){
+        return new InvocationTimes(number);
+    }
+     
+    // Method to set expected number of method calls to zero
+    // Returns a new InvocationTimes object
+    public static AbstractInvocationTimes never(){
+        return new InvocationTimes(0);
+    }
+    
+    // Verify if it's the right amount of method calls
+    // If not an AssertionError is thrown -> Unit tests fail
     @Override
     public void verify(String name, HashMap<String, Integer> hashMap) {
         if(name == null)
@@ -34,7 +43,7 @@ public class InvocationTimes extends AbstractInvocationTimes {
         // Failure if no key and times not zero
         if(_times != 0 && !hashMap.containsKey(name))
             throw new AssertionError(verificationFailureString(comparedString, _times, 0));
-                // Pass if times=0 and there is no key
+        // Pass if times=0 and there is no key
         else if(_times == 0 && !hashMap.containsKey(name))
                 return; 
         else if(_times == 0 && hashMap.containsKey(name))
